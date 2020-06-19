@@ -15,7 +15,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         src/encryptor.cpp \
-        src/main.cpp
+        src/main.cpp \
+        src/userfile.cpp \
+        src/userfilecreator.cpp
 
 RESOURCES += qml.qrc
 
@@ -36,4 +38,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    src/encryptor.h
+    src/encryptor.h \
+    src/userfile.h \
+    src/userfilecreator.h

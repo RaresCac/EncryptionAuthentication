@@ -8,41 +8,18 @@ Encryptor::Encryptor(QObject *parent) : QObject(parent)
 
 }
 
-bool Encryptor::generateFileQML(QString username, QString password)
+uchar *Encryptor::getRandomKey(int size)
 {
-    return _generateFile(username, password);
+    uchar* randomKey = new uchar[size];
+    _generateRandomBytes(randomKey, size);
+    return randomKey;
 }
 
-
-bool Encryptor::_generateFile(QString username, QString password){
-
-    //Key to be used for encryption of other files
-    uchar fileKey[_encKeySize];
-    _generateRandomBytes(fileKey, _encKeySize);
-
-    //Salt for PBKDF2-SHA-512
-    uchar salt[_derivedKeySize];
-    _generateRandomBytes(salt, _derivedKeySize);
-
+void Encryptor::derivePassword(QString password, uchar* salt, uchar *storedPDKOut, uchar *encPDKOut)
+{
     uchar derivedPass[_derivedKeySize];
-    _derivePassword(username.toUtf8().data(), salt, _derivedKeySize, derivedPass);
-
-    //To be hashed and stored in the user file
-    //Used to authenticate the user from the password
-    uchar storedHalf[_derivedKeySize/2];
-    //Used to encrypt the fileKey
-    uchar encHalf[_derivedKeySize/2];
-
-    _splitArrayHalf(derivedPass, _derivedKeySize, storedHalf, encHalf);
-
-    uchar iv[_ivSize];
-    _generateRandomBytes(iv, _ivSize);
-
-    uchar encryptedFileKey[_encKeySize];
-    _encryptAES_256_CBC(fileKey, _encKeySize, encHalf, iv, encryptedFileKey);
-
-
-
+    _derivePassword(password.toUtf8().data(), salt, _derivedKeySize, derivedPass);
+    _splitArrayHalf(derivedPass, _derivedKeySize, storedPDKOut, encPDKOut);
 }
 
 bool Encryptor::_generateRandomBytes(uchar *array, size_t size){
@@ -54,7 +31,7 @@ int Encryptor::_derivePassword(char *password, uchar *salt, size_t size, uchar *
     return PKCS5_PBKDF2_HMAC(password, size, salt, size, size, EVP_sha3_512(), size, output);
 }
 
-int Encryptor::_encryptAES_256_CBC(uchar *input, size_t inLen, uchar *key, uchar *iv, uchar *output)
+int Encryptor::encryptAES_256_CBC(uchar *input, size_t inLen, uchar *key, uchar *iv, uchar *output)
 {
     EVP_CIPHER_CTX* ctx;
 
@@ -89,7 +66,7 @@ void Encryptor::_splitArrayHalf(uchar *input, size_t inSize, uchar *half1, uchar
     memcpy(half2, input + outLen, outLen);
 }
 
-int Encryptor::_sha256(uchar *input, size_t inSize, uchar *output, uint* outSize)
+int Encryptor::sha256(uchar *input, size_t inSize, uchar *output, uint* outSize)
 {
     EVP_MD_CTX* ctx;
 
@@ -105,9 +82,3 @@ int Encryptor::_sha256(uchar *input, size_t inSize, uchar *output, uint* outSize
     return 0;
 }
 
-void Encryptor::_handleErrorMessage(int errorCode)
-{
-    switch (errorCode) {
-        default: emit errorMessage("Unspecified error.");
-    }
-}

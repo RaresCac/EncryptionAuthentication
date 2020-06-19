@@ -8,6 +8,13 @@ Window {
     height: 480
     title: qsTr("Password Authentication")
 
+    Connections {
+        target: ufc
+        onErrorMessage: {
+            console.log(message)
+        }
+    }
+
     Column {
         TextField {
             id: usernameIn
@@ -22,8 +29,8 @@ Window {
 
         Button {
             text: "Create file"
-            onClicked: encryptor.generateFileQML(usernameIn.text, passIn.text)
+            onClicked: ufc.generateFile(usernameIn.text, passIn.text) ?
+                            text = "Success!" : text = "Fail"
         }
     }
-
 }

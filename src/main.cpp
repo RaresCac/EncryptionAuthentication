@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include "encryptor.h"
+#include "userfilecreator.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     //Add instance of encryptor as global context property
-    Encryptor* enc = new Encryptor();
-    engine.rootContext()->setContextProperty("encryptor", enc);
+    UserFileCreator* ufc = new UserFileCreator();
+    engine.rootContext()->setContextProperty("ufc", ufc);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
