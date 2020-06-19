@@ -2,11 +2,11 @@
 #include <QIODevice>
 #include <QSaveFile>
 #include <QDebug>
+#include <QDir>
 
 UserFileCreator::UserFileCreator(QObject *parent) : QObject(parent)
 {
     //Connect errorOccured with handleError so that it is invoked automatically
-    //connect(&_encryptor, SIGNAL(errorOccured(int id)), this, SLOT(error(int id)));
     connect(&_encryptor, &Encryptor::errorOccured, this, &UserFileCreator::error);
 }
 
@@ -15,8 +15,11 @@ bool UserFileCreator::generateFile(QString username, QString password)
     UserFile userFile;
 
     int keySize = 32;
-    int pdkSize = 64;
-    int aesBlockSize = 16;
+
+    _encryptor.setKeySize(keySize);
+
+    int pdkSize = keySize * 2;
+    int aesBlockSize = AES_BLOCK_SIZE;
 
     //First, generate key to be kept secret
     //Will be used to encrypt other files
@@ -58,9 +61,13 @@ void UserFileCreator::error(int id)
 
 bool UserFileCreator::_saveFile(UserFile uf)
 {
+    QDir dir("saves");
+    if (!dir.exists())
+        dir.mkpath(".");
+
     QString fileName = "saves/" + uf.getFileName() + ".save";
     QSaveFile save(fileName);
-    qDebug() << fileName;
+
     save.open(QIODevice::WriteOnly);
     save.write(uf.saltArray());
     save.write(uf.aesIVArray());

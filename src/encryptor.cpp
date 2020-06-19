@@ -1,5 +1,4 @@
 #include "encryptor.h"
-#include <openssl/aes.h>
 #include <openssl/rand.h>
 #include <openssl/evp.h>
 
@@ -46,7 +45,7 @@ int Encryptor::encryptAES_256_CBC(uchar *input, size_t inLen, uchar *key, uchar 
     //Initialize the algorithm to encrypt with the passed key and IV.
     if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) return false;
 
-    //Encrypts the
+    //Encrypts the input
     if(1 != EVP_EncryptUpdate(ctx, output, &len, input, inLen)) return false;
     outLen = len;
 
@@ -64,6 +63,16 @@ void Encryptor::_splitArrayHalf(uchar *input, size_t inSize, uchar *half1, uchar
     size_t outLen = inSize / 2;
     memcpy(half1, input, outLen);
     memcpy(half2, input + outLen, outLen);
+}
+
+size_t Encryptor::getKeySize() const
+{
+    return _keySize;
+}
+
+void Encryptor::setKeySize(const size_t &keySize)
+{
+    _keySize = keySize;
 }
 
 int Encryptor::sha256(uchar *input, size_t inSize, uchar *output, uint* outSize)

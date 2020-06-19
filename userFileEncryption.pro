@@ -23,14 +23,13 @@ RESOURCES += qml.qrc
 
 PKGCONFIG += openssl
 
+win32 {
+    LIBS += -LC:/Libraries/openssl-1.1.1g-win64-mingw/lib
+    INCLUDEPATH += C:/Libraries/OpenSSL-Win64/include
+}
+
 #Libraries for OpenSSL
 LIBS += -lssl -lcrypto
-
-# Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
-
-# Additional import path used to resolve QML modules just for Qt Quick Designer
-QML_DESIGNER_IMPORT_PATH =
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

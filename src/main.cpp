@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    //Add instance of encryptor as global context property
+    //Add instance of userFileCreator as global context property
     UserFileCreator* ufc = new UserFileCreator();
     engine.rootContext()->setContextProperty("ufc", ufc);
 
