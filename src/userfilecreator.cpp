@@ -56,6 +56,8 @@ bool UserFileCreator::generateFile(QString username, QString password)
 bool UserFileCreator::loadFile(QString username, QString password)
 {
     //todo
+    Q_UNUSED(username); Q_UNUSED(password);
+    return true;
 }
 
 void UserFileCreator::error(int id)
@@ -83,9 +85,12 @@ bool UserFileCreator::_saveFile(UserFile uf)
 bool UserFileCreator::_loadFile(UserFile uf)
 {
     //todo
+    Q_UNUSED(uf);
+    return true;
 }
 
 void UserFileCreator::_handleError(int id)
 {
+    Q_UNUSED(id); //todo
     emit errorMessage("Error");
 }
