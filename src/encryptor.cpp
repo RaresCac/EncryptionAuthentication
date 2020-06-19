@@ -67,12 +67,12 @@ void Encryptor::_splitArrayHalf(uchar *input, size_t inSize, uchar *half1, uchar
 
 int Encryptor::getPassIterations() const
 {
-    return _passIterations;
+    return _pdfIterations;
 }
 
 void Encryptor::setPassIterations(int passIterations)
 {
-    _passIterations = passIterations;
+    _pdfIterations = passIterations;
 }
 
 size_t Encryptor::getKeySize() const
