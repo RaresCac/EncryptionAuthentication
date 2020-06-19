@@ -6,7 +6,6 @@
 
 UserFileCreator::UserFileCreator(QObject *parent) : QObject(parent)
 {
-    //Connect errorOccured with handleError so that it is invoked automatically
     connect(&_encryptor, &Encryptor::errorOccured, this, &UserFileCreator::error);
 }
 
@@ -54,6 +53,11 @@ bool UserFileCreator::generateFile(QString username, QString password)
     return true;
 }
 
+bool UserFileCreator::loadFile(QString username, QString password)
+{
+    //todo
+}
+
 void UserFileCreator::error(int id)
 {
     _handleError(id);
@@ -74,6 +78,11 @@ bool UserFileCreator::_saveFile(UserFile uf)
     save.write(uf.hashedPDKArray());
     save.write(uf.encKeyArray());
     return save.commit();
+}
+
+bool UserFileCreator::_loadFile(UserFile uf)
+{
+    //todo
 }
 
 void UserFileCreator::_handleError(int id)

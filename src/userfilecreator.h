@@ -16,10 +16,12 @@ signals:
 
 public slots:
     bool generateFile(QString username, QString password);
+    bool loadFile(QString username, QString password);
     void error(int);
 
 private:
     bool _saveFile(UserFile uf);
+    bool _loadFile(UserFile uf);
     void _handleError(int id);
 
     Encryptor _encryptor;

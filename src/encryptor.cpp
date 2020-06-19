@@ -65,6 +65,16 @@ void Encryptor::_splitArrayHalf(uchar *input, size_t inSize, uchar *half1, uchar
     memcpy(half2, input + outLen, outLen);
 }
 
+int Encryptor::getPassIterations() const
+{
+    return _passIterations;
+}
+
+void Encryptor::setPassIterations(int passIterations)
+{
+    _passIterations = passIterations;
+}
+
 size_t Encryptor::getKeySize() const
 {
     return _keySize;
