@@ -3,10 +3,13 @@
 #include <QSaveFile>
 #include <QDebug>
 #include <QDir>
+#include <QtGlobal>
 
 UserFileCreator::UserFileCreator(QObject *parent) : QObject(parent)
 {
+    _keyRetriever.setEncryptor(&_encryptor);
     connect(&_encryptor, &Encryptor::errorOccured, this, &UserFileCreator::error);
+    connect(&_keyRetriever, &KeyRetriever::error, this, &UserFileCreator::errorWithMessage);
 }
 
 bool UserFileCreator::generateFile(QString username, QString password)
@@ -63,6 +66,11 @@ bool UserFileCreator::loadFile(QString username, QString password)
 void UserFileCreator::error(int id)
 {
     _handleError(id);
+}
+
+void UserFileCreator::errorWithMessage(QString msg)
+{
+    emit errorMessage(msg);
 }
 
 bool UserFileCreator::_saveFile(UserFile uf)

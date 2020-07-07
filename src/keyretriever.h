@@ -17,6 +17,7 @@ public:
     explicit KeyRetriever(QObject *parent = nullptr);
 
     bool retrieveKey(UserFile uf, QString password);
+    void printKey();
     void removeFileKey();
 
     Encryptor *encryptor() const;
@@ -36,7 +37,7 @@ private:
     bool _compareQBAtoUchar(QByteArray qba, uchar* uca, int inSize);
 
     int _keySize = 32;
-    uchar* _fileKey;
+    QByteArray _fileKey;
     Encryptor* _encryptor;
 
 };

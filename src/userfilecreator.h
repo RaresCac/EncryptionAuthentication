@@ -19,6 +19,7 @@ public slots:
     bool generateFile(QString username, QString password);
     bool loadFile(QString username, QString password);
     void error(int);
+    void errorWithMessage(QString);
 
 private:
     bool _saveFile(UserFile uf);

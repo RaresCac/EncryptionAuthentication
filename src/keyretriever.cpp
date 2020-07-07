@@ -41,8 +41,10 @@ bool KeyRetriever::retrieveKey(UserFile uf, QString password)
     uchar* encFileKey = _QBAtoUchar(uf.encKeyArray(), encKeySize);  //Encrypted file key
     uchar* iv = _QBAtoUchar(uf.aesIVArray(), ivSize);               //IV for AES
 
-    _fileKey = new uchar[_keySize];
-    _encryptor->decryptAES_256_CBC(encFileKey, encKeySize, encPDK, iv, _fileKey);
+    uchar fileKey[_keySize];
+    _encryptor->decryptAES_256_CBC(encFileKey, encKeySize, encPDK, iv, fileKey);
+
+    _fileKey = QByteArray(reinterpret_cast<char*>(fileKey), _keySize);
 
     delete[] salt;
     delete[] encFileKey;
@@ -50,10 +52,16 @@ bool KeyRetriever::retrieveKey(UserFile uf, QString password)
     return true;
 }
 
+void KeyRetriever::printKey()
+{
+    qDebug() << _fileKey.toHex();
+}
+
 void KeyRetriever::removeFileKey()
 {
     //Fills the _fileKey array with 0
-    memset(_fileKey, 0, _keySize);
+    //memset(_fileKey, 0, _keySize);
+    _fileKey.clear();
 }
 
 Encryptor *KeyRetriever::encryptor() const

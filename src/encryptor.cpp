@@ -60,7 +60,30 @@ int Encryptor::encryptAES_256_CBC(uchar *input, size_t inLen, uchar *key, uchar 
 
 int Encryptor::decryptAES_256_CBC(uchar *input, size_t inSize, uchar *key, uchar *iv, uchar *output)
 {
-    //todo
+    EVP_CIPHER_CTX* ctx;
+
+    //Temporary length
+    int len;
+    //Output length of the resulting ciphertext
+    int outLen;
+
+    //Create contex
+    if(!(ctx = EVP_CIPHER_CTX_new())) return false;
+
+    //Initialize the algorithm to encrypt with the passed key and IV.
+    if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) return false;
+
+    //Encrypts the input
+    if(1 != EVP_DecryptUpdate(ctx, output, &len, input, inSize)) return false;
+    outLen = len;
+
+    //Encrypt last data that does not fill a block
+    if(1 != EVP_DecryptFinal_ex(ctx, output + len, &len))
+    outLen += len;
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    return outLen;
 }
 
 void Encryptor::_splitArrayHalf(uchar *input, size_t inSize, uchar *half1, uchar *half2)
