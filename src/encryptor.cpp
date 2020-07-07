@@ -58,6 +58,11 @@ int Encryptor::encryptAES_256_CBC(uchar *input, size_t inLen, uchar *key, uchar 
     return outLen;
 }
 
+int Encryptor::decryptAES_256_CBC(uchar *input, size_t inSize, uchar *key, uchar *iv, uchar *output)
+{
+    //todo
+}
+
 void Encryptor::_splitArrayHalf(uchar *input, size_t inSize, uchar *half1, uchar *half2)
 {
     size_t outLen = inSize / 2;

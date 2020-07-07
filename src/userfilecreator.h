@@ -4,6 +4,7 @@
 #include <QObject>
 #include "encryptor.h"
 #include "userfile.h"
+#include "keyretriever.h"
 
 class UserFileCreator : public QObject
 {
@@ -21,10 +22,12 @@ public slots:
 
 private:
     bool _saveFile(UserFile uf);
-    bool _loadFile(UserFile uf);
+    bool _loadFile(UserFile &uf, QString username);
     void _handleError(int id);
 
+    int _keySize = 32;
     Encryptor _encryptor;
+    KeyRetriever _keyRetriever;
 
 };
 

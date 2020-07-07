@@ -13,35 +13,34 @@ bool UserFileCreator::generateFile(QString username, QString password)
 {
     UserFile userFile;
 
-    int keySize = 32;
+    _encryptor.setKeySize(_keySize);
 
-    _encryptor.setKeySize(keySize);
-
-    int pdkSize = keySize * 2;
+    //Password derived key size
+    int pdkSize = _keySize * 2;
     int aesBlockSize = AES_BLOCK_SIZE;
 
     //First, generate key to be kept secret
     //Will be used to encrypt other files
-    uchar* fileKey = _encryptor.getRandomKey(keySize);   //256 bit key, for AES 256 CBC
+    uchar* fileKey = _encryptor.getRandomKey(_keySize);   //256 bit key, for AES 256 CBC
     uchar* pbkdf2Salt = _encryptor.getRandomKey(pdkSize);
     uchar* aesIV = _encryptor.getRandomKey(aesBlockSize);
 
-    uchar storedPDKHalf[keySize];    //Will be stored hashed, used for authentication
-    uchar encPDKHalf[keySize];       //Will encrypt the fileKey
+    uchar storedPDKHalf[_keySize];    //Will be stored hashed, used for authentication
+    uchar encPDKHalf[_keySize];       //Will encrypt the fileKey
     _encryptor.derivePassword(password, pbkdf2Salt, storedPDKHalf, encPDKHalf);
 
-    uchar hashedStoredPDK[keySize];
+    uchar hashedStoredPDK[_keySize];
     uint hashSize;
-    _encryptor.sha256(storedPDKHalf, keySize, hashedStoredPDK, &hashSize);
+    _encryptor.sha256(storedPDKHalf, _keySize, hashedStoredPDK, &hashSize);
 
-    uchar encryptedFileKey[keySize];
-    _encryptor.encryptAES_256_CBC(fileKey, keySize, encPDKHalf, aesIV, encryptedFileKey);
+    uchar encryptedFileKey[_keySize];
+    _encryptor.encryptAES_256_CBC(fileKey, _keySize, encPDKHalf, aesIV, encryptedFileKey);
 
     //Everything needed is now computed, so save in userFile
     userFile.setSaltArray(QByteArray(reinterpret_cast<char*>(pbkdf2Salt), pdkSize));
     userFile.setAesIVArray(QByteArray(reinterpret_cast<char*>(aesIV), aesBlockSize));
-    userFile.setHashedPDKArray(QByteArray(reinterpret_cast<char*>(&hashedStoredPDK), keySize));
-    userFile.setEncKeyArray(QByteArray(reinterpret_cast<char*>(&encryptedFileKey), keySize));
+    userFile.setHashedPDKArray(QByteArray(reinterpret_cast<char*>(&hashedStoredPDK), _keySize));
+    userFile.setEncKeyArray(QByteArray(reinterpret_cast<char*>(&encryptedFileKey), _keySize));
 
     userFile.setFileName(username);
     _saveFile(userFile);
@@ -55,8 +54,9 @@ bool UserFileCreator::generateFile(QString username, QString password)
 
 bool UserFileCreator::loadFile(QString username, QString password)
 {
-    //todo
-    Q_UNUSED(username); Q_UNUSED(password);
+    UserFile uf;
+    if (!_loadFile(uf, username)) return false;
+    if (!_keyRetriever.retrieveKey(uf, password)) return false;    //Key is decrypted and stored in KeyRetriever
     return true;
 }
 
@@ -82,10 +82,17 @@ bool UserFileCreator::_saveFile(UserFile uf)
     return save.commit();
 }
 
-bool UserFileCreator::_loadFile(UserFile uf)
-{
-    //todo
-    Q_UNUSED(uf);
+bool UserFileCreator::_loadFile(UserFile &uf, QString username)
+{    
+    QString fileName = "saves/" + username + ".save";
+
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly);
+    uf.setSaltArray(file.read(_keySize));
+    uf.setAesIVArray(file.read(AES_BLOCK_SIZE));
+    uf.setHashedPDKArray(file.read(_keySize));
+    uf.setEncKeyArray(file.read(_keySize));
+    file.close();
     return true;
 }
 

@@ -6,6 +6,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         src/encryptor.cpp \
+        src/keyretriever.cpp \
         src/main.cpp \
         src/userfile.cpp \
         src/userfilecreator.cpp
@@ -29,5 +30,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     src/encryptor.h \
+    src/keyretriever.h \
     src/userfile.h \
     src/userfilecreator.h
