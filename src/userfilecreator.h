@@ -18,6 +18,9 @@ signals:
 public slots:
     bool generateFile(QString username, QString password);
     bool loadFile(QString username, QString password);
+
+    void printKey();
+
     void error(int);
     void errorWithMessage(QString);
 
@@ -26,7 +29,7 @@ private:
     bool _loadFile(UserFile &uf, QString username);
     void _handleError(int id);
 
-    int _keySize = 32;
+    int _keySize;
     Encryptor _encryptor;
     KeyRetriever _keyRetriever;
 

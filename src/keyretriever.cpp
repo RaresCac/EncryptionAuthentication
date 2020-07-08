@@ -14,7 +14,7 @@ bool KeyRetriever::retrieveKey(UserFile uf, QString password)
     uchar* salt = _QBAtoUchar(uf.saltArray(), saltSize);
 
     if (saltSize != pdkSize) {
-        emit error("Error retrieving salt. Size does not match expected.");
+        emit error("Error retrieving salt. Size was " + QString::number(saltSize) + ", expected: " + QString::number(pdkSize));
         return false;
     }
 
@@ -27,8 +27,8 @@ bool KeyRetriever::retrieveKey(UserFile uf, QString password)
 
     uchar hashAuthPDK[_keySize];
     uint hashSize;
-    _encryptor->sha256(authPDK, sizeof (authPDK), hashAuthPDK, &hashSize);
 
+    _encryptor->sha256(authPDK, _keySize, hashAuthPDK, &hashSize);
 
     //Check if the stored authPDK is equal to the recently computed
     //If they are equal, it means that the password input by the user is correct
@@ -46,9 +46,11 @@ bool KeyRetriever::retrieveKey(UserFile uf, QString password)
 
     _fileKey = QByteArray(reinterpret_cast<char*>(fileKey), _keySize);
 
+
     delete[] salt;
     delete[] encFileKey;
     delete[] iv;
+    emit keyRetrieved();
     return true;
 }
 
@@ -60,8 +62,12 @@ void KeyRetriever::printKey()
 void KeyRetriever::removeFileKey()
 {
     //Fills the _fileKey array with 0
-    //memset(_fileKey, 0, _keySize);
     _fileKey.clear();
+}
+
+void KeyRetriever::updateKeySize()
+{
+    _keySize = _encryptor->getKeySize();
 }
 
 Encryptor *KeyRetriever::encryptor() const
@@ -71,7 +77,13 @@ Encryptor *KeyRetriever::encryptor() const
 
 void KeyRetriever::setEncryptor(Encryptor *encryptor)
 {
+    //Remove existing connections
+    if (_encryptor != nullptr){
+        connect(_encryptor, &Encryptor::keySizeUpdated, this, &KeyRetriever::updateKeySize);
+    }
     _encryptor = encryptor;
+    updateKeySize();
+    connect(_encryptor, &Encryptor::keySizeUpdated, this, &KeyRetriever::updateKeySize);
 }
 
 int KeyRetriever::getKeySize() const
@@ -86,7 +98,6 @@ void KeyRetriever::setKeySize(int keySize)
 
 uchar* KeyRetriever::_QBAtoUchar(QByteArray qba, int& outSize)
 {
-    qDebug() << qba.size();
     outSize = qba.size();
     uchar* uca = new uchar[outSize];
     memcpy(uca, qba.data(), outSize);

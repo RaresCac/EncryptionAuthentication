@@ -24,10 +24,11 @@ public:
 
 signals:
     void errorOccured(int id);
+    void keySizeUpdated();
 
 private:
     bool _generateRandomBytes(uchar* array, size_t size);
-    int _derivePassword(char* password, uchar* salt, size_t size, uchar* output);
+    int _derivePassword(char* password, int passSize, uchar* salt, int saltSize, uchar* output);
     void _splitArrayHalf(uchar* input, size_t inSize, uchar* half1, uchar* half2);
     void _handleErrorMessage(int errorCode);
 

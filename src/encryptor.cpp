@@ -1,6 +1,7 @@
 #include "encryptor.h"
 #include <openssl/rand.h>
 #include <openssl/evp.h>
+#include <QtDebug>
 
 Encryptor::Encryptor(QObject *parent) : QObject(parent)
 {
@@ -17,7 +18,7 @@ uchar *Encryptor::getRandomKey(int size)
 void Encryptor::derivePassword(QString password, uchar* salt, uchar *storedPDKOut, uchar *encPDKOut)
 {
     uchar derivedPass[_derivedKeySize];
-    _derivePassword(password.toUtf8().data(), salt, _derivedKeySize, derivedPass);
+    if (1 != _derivePassword(password.toUtf8().data(), password.toUtf8().size(), salt, _derivedKeySize, derivedPass)) qDebug() << "Uh oh errorr....";
     _splitArrayHalf(derivedPass, _derivedKeySize, storedPDKOut, encPDKOut);
 }
 
@@ -25,9 +26,9 @@ bool Encryptor::_generateRandomBytes(uchar *array, size_t size){
     return RAND_bytes(array, size) == 1;
 }
 
-int Encryptor::_derivePassword(char *password, uchar *salt, size_t size, uchar *output)
+int Encryptor::_derivePassword(char *password, int passSize, uchar *salt, int saltSize, uchar *output)
 {
-    return PKCS5_PBKDF2_HMAC(password, size, salt, size, size, EVP_sha3_512(), size, output);
+    return PKCS5_PBKDF2_HMAC(password, passSize, salt, saltSize, _pdfIterations, EVP_sha3_512(), saltSize, output);
 }
 
 int Encryptor::encryptAES_256_CBC(uchar *input, size_t inLen, uchar *key, uchar *iv, uchar *output)
@@ -111,6 +112,7 @@ size_t Encryptor::getKeySize() const
 void Encryptor::setKeySize(const size_t &keySize)
 {
     _keySize = keySize;
+    emit keySizeUpdated();
 }
 
 int Encryptor::sha256(uchar *input, size_t inSize, uchar *output, uint* outSize)
